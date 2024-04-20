@@ -33,7 +33,6 @@ void monitor(char *user) {
         exit(1);
     }
     if (pid == 0) {
-        // Membuat proses ini menjadi pemimpin grup proses
         setpgid(0, 0);
         while (1) {
             pid_t child_pid = fork();
@@ -54,10 +53,9 @@ void monitor(char *user) {
 
 void stop() {
     printf("proses monitor dihentikan\n");
-    // Menghentikan seluruh grup proses
     if (pid > 0) {
         kill(-pid, SIGKILL);
-        write_log(log_file, "monitor proses", "dihentikan", pid);
+        write_log(log_file, "monitor proses", "gagal", pid);
     }
     if (log_file != NULL) {
         fclose(log_file);
@@ -68,7 +66,7 @@ void cancel() {
     printf("proses digagalkan\n");
     if (pid > 0) {
         kill(pid, SIGSTOP);
-        write_log(log_file, "monitor proses", "digagalkan", pid);
+        write_log(log_file, "monitor proses", "gagal", pid);
     }
 }
 
