@@ -233,9 +233,11 @@ int main(int argc,char *argv[]){
 					
 				if(strstr(de->d_name,"d3Let3")!=NULL){
 					removeFile(de->d_name);
+					historyLog(userName,time_str,old_name,"deleted");
 				}
 				else if(strstr(de->d_name,"r3N4mE")!=NULL){
 					renameFile(new_name);
+					historyLog(userName,time_str,old_name,"renamed");
 				}
 			}
 		}
@@ -245,4 +247,3 @@ int main(int argc,char *argv[]){
 	remove("/home/user/modul_2/soal_2:/debug.log");
 	return 0;
 }
-
