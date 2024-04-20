@@ -48,7 +48,7 @@ void replacestrings(const char *filepath, const char *log_path) {
     rename(temp, filepath);
 }
 
-void searchmodifyfiles(const char *dirpath, const char *log_path) {
+void searchh(const char *dirpath, const char *log_path) {
     DIR *dir;
     struct dirent *ent;
     char path[1000];
@@ -74,17 +74,14 @@ int main(int argc, char *argv[]) {
     }
 
     pid_t pid;
-
     pid = fork();
 
     if (pid < 0) {
         exit(EXIT_FAILURE);
     }
-
     if (pid > 0) {
         exit(EXIT_SUCCESS);
     }
-
     umask(0);
 
     if (setsid() < 0) {
@@ -96,9 +93,8 @@ int main(int argc, char *argv[]) {
     close(STDERR_FILENO);
 
     while (1) {
-        searchmodifyfiles(argv[1], "virus.log");
+        searchh(argv[1], "virus.log");
         sleep(15);
     }
-
     exit(EXIT_SUCCESS);
 }
