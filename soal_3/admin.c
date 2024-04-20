@@ -10,10 +10,12 @@
 pid_t pid;
 FILE *log_file;
 
-void write_log(FILE *file, char *process_name, char *status) {
+void write_log(FILE *file, char *process_name, char *status, pid_t pid_to_log) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    fprintf(file, "[%02d:%02d:%04d]-[%02d:%02d:%02d]-%d-%s_%s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, pid, process_name, status);
+    if (file != NULL) {
+        fprintf(file, "[%02d:%02d:%04d]-[%02d:%02d:%02d]-%d-%s_%s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, pid_to_log, process_name, status);
+    }
 }
 
 void monitor(char *user) {
@@ -31,6 +33,8 @@ void monitor(char *user) {
         exit(1);
     }
     if (pid == 0) {
+        // Membuat proses ini menjadi pemimpin grup proses
+        setpgid(0, 0);
         while (1) {
             pid_t child_pid = fork();
             if (child_pid == 0) {
@@ -41,7 +45,7 @@ void monitor(char *user) {
                 execvp(args[0], args);
             } else {
                 wait(NULL);
-                write_log(log_file, "monitor proses", "berjalan");
+                write_log(log_file, "monitor proses", "berjalan", child_pid);
                 sleep(1);
             }
         }
@@ -50,24 +54,30 @@ void monitor(char *user) {
 
 void stop() {
     printf("proses monitor dihentikan\n");
-    kill(pid, SIGKILL);
-    write_log(log_file, "monitor proses", "dihentikan");
-    fclose(log_file);
+    // Menghentikan seluruh grup proses
+    if (pid > 0) {
+        kill(-pid, SIGKILL);
+        write_log(log_file, "monitor proses", "dihentikan", pid);
+    }
+    if (log_file != NULL) {
+        fclose(log_file);
+    }
 }
 
 void cancel() {
     printf("proses digagalkan\n");
-    while(1) {
+    if (pid > 0) {
         kill(pid, SIGSTOP);
-        write_log(log_file, "monitor proses", "digagalkan");
-        sleep(1);
+        write_log(log_file, "monitor proses", "digagalkan", pid);
     }
 }
 
 void resume() {
     printf("proses dijalankan kembali\n");
-    kill(pid, SIGCONT);
-    write_log(log_file, "monitor proses", "dijalankan kembali");
+    if (pid > 0) {
+        kill(pid, SIGCONT);
+        write_log(log_file, "monitor proses", "dijalankan kembali", pid);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -89,4 +99,3 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
-
