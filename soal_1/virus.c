@@ -6,61 +6,63 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
-#define size 1024
+#define buffersize 1024
 
-void replace(char *file) {
-    const char *sus[] = {"m4LwAr3", "5pYw4R3", "R4nS0mWaR3"};
-    const char *rep[] = {"[MALWARE]", "[SPYWARE]", "[RANSOMWARE]"};
+void replacestrings(const char *filepath) {
+    const char *suspects[] = {"m4lw4r3", "5pyw4r3", "r4ns0mwar3"};
+    const char *replacements[] = {"[malware]", "[spyware]", "[ransomware]"};
     char temp[] = "temp.txt";
-    FILE *f, *t, *l;
-    char buffer[size];
-    time_t ttime = time(NULL);
-    struct tm *lt = localtime(&ttime);
+    int input, output, log;
+    char buffer[buffersize];
+    time_t t = time(NULL);
+    struct tm *lt = localtime(&t);
 
-    f = fopen(file, "r");
-    t = fopen(temp, "w");
-    l = fopen("virus.log", "a");
+    input = open(filepath, O_RDONLY);
+    output = open(temp, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    log = open("virus.log", O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 
-    while (fgets(buffer, size, f) != NULL) {
-        char *b = strdup(buffer); // Create a duplicate buffer
-        int r = 0;
-        for (int i = 0; i < sizeof(sus) / sizeof(sus[0]); ++i) {
-            char *found = strstr(b, sus[i]);
+    while (read(input, buffer, buffersize) > 0) {
+        char *tempbuffer = strdup(buffer);
+        int replaced = 0;
+        for (int i = 0; i < sizeof(suspects) / sizeof(suspects[0]); ++i) {
+            char *found = strstr(tempbuffer, suspects[i]);
             if (found) {
-                strncpy(found, rep[i], strlen(rep[i]));
-                r = 1;
+                strncpy(found, replacements[i], strlen(replacements[i]));
+                replaced = 1;
             }
         }
-        if (r) {
-            fprintf(l, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n",
-                    lt->tm_mday, lt->tm_mon + 1, lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec, file);
+        if (replaced) {
+            dprintf(log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n",
+                    lt->tm_mday, lt->tm_mon + 1, lt->tm_year + 1900,
+                    lt->tm_hour, lt->tm_min, lt->tm_sec, filepath);
         }
-        fprintf(t, "%s", b);
-        free(b); // Free the duplicate buffer
+        write(output, tempbuffer, strlen(tempbuffer));
+        free(tempbuffer);
     }
 
-    fclose(f);
-    fclose(t);
-    fclose(l);
+    close(input);
+    close(output);
+    close(log);
 
-    remove(file);
-    rename(temp, file);
+    remove(filepath);
+    rename(temp, filepath);
 }
 
-void search(char *d) {
+void searchmodifyfiles(const char *dirpath) {
     DIR *dir;
     struct dirent *ent;
-    char p[1000];
-    struct stat s;
+    char path[1000];
+    struct stat filestat;
 
-    dir = opendir(d);
+    dir = opendir(dirpath);
     if (dir) {
         while ((ent = readdir(dir)) != NULL) {
-            snprintf(p, sizeof(p), "%s/%s", d, ent->d_name);
-            stat(p, &s);
-            if (S_ISREG(s.st_mode)) {
-                replace(p);
+            snprintf(path, sizeof(path), "%s/%s", dirpath, ent->d_name);
+            stat(path, &filestat);
+            if (S_ISREG(filestat.st_mode)) {
+                replacestrings(path);
             }
         }
         closedir(dir);
@@ -68,15 +70,15 @@ void search(char *d) {
 }
 
 int main(int argc, char *argv[]) {
-    pid_t p;
+    pid_t pid;
 
-    p = fork();
+    pid = fork();
 
-    if (p < 0) {
+    if (pid < 0) {
         exit(EXIT_FAILURE);
     }
 
-    if (p > 0) {
+    if (pid > 0) {
         exit(EXIT_SUCCESS);
     }
 
@@ -86,12 +88,12 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    close(fileno(stdin));
-    close(fileno(stdout));
-    close(fileno(stderr));
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     while (1) {
-        search(argv[1]);
+        searchmodifyfiles(argv[1]);
         sleep(15);
     }
 
