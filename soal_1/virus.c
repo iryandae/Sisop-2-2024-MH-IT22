@@ -10,9 +10,9 @@
 
 #define buffersize 1024
 
-void replacestrings(const char *filepath) {
-    const char *suspects[] = {"m4lw4r3", "5pyw4r3", "r4ns0mwar3"};
-    const char *replacements[] = {"[malware]", "[spyware]", "[ransomware]"};
+void replacestrings(const char *filepath, const char *log_path) {
+    const char *suspects[] = {"m4LwAr3", "5pYw4R3", "R4nS0mWaR3"};
+    const char *replacements[] = {"[MALWARE]", "[SPYWARE]", "[RANSOMWARE]"};
     char temp[] = "temp.txt";
     int input, output, log;
     char buffer[buffersize];
@@ -21,7 +21,7 @@ void replacestrings(const char *filepath) {
 
     input = open(filepath, O_RDONLY);
     output = open(temp, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    log = open("virus.log", O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+    log = open(log_path, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 
     while (read(input, buffer, buffersize) > 0) {
         char *tempbuffer = strdup(buffer);
@@ -29,14 +29,12 @@ void replacestrings(const char *filepath) {
         for (int i = 0; i < sizeof(suspects) / sizeof(suspects[0]); ++i) {
             char *found = strstr(tempbuffer, suspects[i]);
             if (found) {
-                strncpy(found, replacements[i], strlen(replacements[i]));
+                strncpy(found, replacements[i], strlen(replacements[i]) + 1);
                 replaced = 1;
+                dprintf(log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n",
+                        lt->tm_mday, lt->tm_mon + 1, lt->tm_year + 1900,
+                        lt->tm_hour, lt->tm_min, lt->tm_sec, filepath);
             }
-        }
-        if (replaced) {
-            dprintf(log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n",
-                    lt->tm_mday, lt->tm_mon + 1, lt->tm_year + 1900,
-                    lt->tm_hour, lt->tm_min, lt->tm_sec, filepath);
         }
         write(output, tempbuffer, strlen(tempbuffer));
         free(tempbuffer);
@@ -50,7 +48,7 @@ void replacestrings(const char *filepath) {
     rename(temp, filepath);
 }
 
-void searchmodifyfiles(const char *dirpath) {
+void searchmodifyfiles(const char *dirpath, const char *log_path) {
     DIR *dir;
     struct dirent *ent;
     char path[1000];
@@ -62,7 +60,7 @@ void searchmodifyfiles(const char *dirpath) {
             snprintf(path, sizeof(path), "%s/%s", dirpath, ent->d_name);
             stat(path, &filestat);
             if (S_ISREG(filestat.st_mode)) {
-                replacestrings(path);
+                replacestrings(path, log_path);
             }
         }
         closedir(dir);
@@ -70,6 +68,11 @@ void searchmodifyfiles(const char *dirpath) {
 }
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s <directory_path>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     pid_t pid;
 
     pid = fork();
@@ -93,7 +96,7 @@ int main(int argc, char *argv[]) {
     close(STDERR_FILENO);
 
     while (1) {
-        searchmodifyfiles(argv[1]);
+        searchmodifyfiles(argv[1], "virus.log");
         sleep(15);
     }
 
