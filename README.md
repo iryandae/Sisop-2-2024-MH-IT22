@@ -10,9 +10,11 @@ Membuat folder penyimpanan file.
 ```shell
 mkdir sink && cd sink
 ```
+Membuat/konfigurasi file virus.c
 ```shell
 nano virus.c
 ```
+Konfigurasi
 ```shell
 //belum diganti//
 #include <stdio.h>
@@ -116,6 +118,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_SUCCESS);
 }
 ```
+Buat folder untuk teks yang akan diubah agar lebih efisien dan tidak acak atau salah saat ingin menjalankan perintah nanti, karena perintah yang dijalankan akan merubah file pada suatu folder.
 ```shell
 cd.. && mkdir dink && cd dink
 ```
@@ -126,18 +129,23 @@ pU=-JWQ$5$)D-[??%AVh]$cB6bm4LwAr3jEQC2p3R{HV]=-AUaxj:Qe+h
 Pd&f8$F5=E?@#[6jd{TJKj]5pYw4R3{KK1?hz384$ge@iba5GAj$gqB41
 #C&&a}M9C#f64Eb.?%c)dGbCvJXtU[?SE4h]BY4e1PR4nS0mWaR3{]S/{w?*
 ```
+Tampilkan apakah teks sudah tersimpan
 ```shell
 cat jamettie
 ```
+Pindah direktori untuk menjalankan program virus.c
 ```shell
 cd.. && cd sink
 ```
+Perintah untuk menjalankan program/konfigurasi C
 ```shell
 gcc -o virus virus.c
 ```
+Jalankan program virus.c
 ```shell
 ./virus /home/combrero[user]/dink
 ```
+Tampilkan apakah ada perubahan yang tercatat
 ```shell
 cat virus.log
 ```
