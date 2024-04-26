@@ -140,7 +140,7 @@ char historyLog(char *nama, char *waktu, char *file, char *kondisi){
 int main(int argc,char *argv[]){
 	init_dae();
 	int status;
-	
+	while(1){
 	char userName[200];
 	char *user=getenv("USER");
 	strcpy(userName,user);
@@ -245,5 +245,6 @@ int main(int argc,char *argv[]){
 		}
 	}
 	remove("/home/user/modul_2/soal_2:/debug.log");
-	return 0;
+	sleep(30);
+	}
 }
