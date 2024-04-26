@@ -29,7 +29,7 @@ Konfigurasi
 
 #define buffersize 1024
 ```
-Untuk mengganti teks yang terdapat di dalam text file, seperti saat "m4LwAr3" terdeteksi, akan berubah menjadi "[MALWARE]"
+Untuk mengganti teks yang terdapat di dalam text file, kata "m4LwAr3" akan diganti dengan "[MALWARE]", "5pYw4R3" dengan "[SPYWARE]", dan "R4nS0mWaR3" dengan "[RANSOMWARE]". Setelah perubahan selesai, file asli dihapus dan file yang sudah diubah diganti menjadi file asli.
 ```c
 void replacestrings(const char *filepath, const char *log_path) {
     const char *suspects[] = {"m4LwAr3", "5pYw4R3", "R4nS0mWaR3"};
@@ -68,7 +68,9 @@ void replacestrings(const char *filepath, const char *log_path) {
     remove(filepath);
     rename(temp, filepath);
 }
-
+```
+Melakukan pencarian dalam sebuah direktori yang ditentukan (dirpath). Ketika menemukan file di dalamnya, ia memeriksa apakah itu adalah file biasa. Jika iya, fungsi ini memanggil fungsi replacestrings untuk mengganti string dalam file tersebut. Proses penggantian ini juga dicatat dalam sebuah file log.
+```shell
 void searchh(const char *dirpath, const char *log_path) {
     DIR *dir;
     struct dirent *ent;
@@ -87,7 +89,9 @@ void searchh(const char *dirpath, const char *log_path) {
         closedir(dir);
     }
 }
-
+```
+Mencari virus dalam direktori secara berulang. Pertama memeriksa jumlah argumen yang dimasukkan, membuat proses baru. Kemudian melakukan konfigurasi dan memulai loop untuk mencari virus dalam direktori yang ditentukan, dengan batas waktu. Hasil pencarian kemudian dicatat dalam file log. 
+```shell
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Usage: %s <directory_path>\n", argv[0]);
@@ -159,6 +163,8 @@ pU=-JWQ$5$)D-[??%AVh]$cB6b[MALWARE]jEQC2p3R{HV]=-AUaxj:Qe+h
 Pd&f8$F5=E?@#[6jd{TJKj][SPYWARE]{KK1?hz384$ge@iba5GAj$gqB41
 #C&&a}M9C#f64Eb.?%c)dGbCvJXtU[?SE4h]BY4e1P[RANSOMWARE]{]S/{w?*
 ```
+### Error
+
 ## Soal 2
 fungsi untuk mengunduh file dari link yang disediakan
 ```c
