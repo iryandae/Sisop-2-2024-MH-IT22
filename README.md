@@ -292,6 +292,7 @@ void renameFile(char *str){
 File yang tidak diproses dan tidak memiliki kode ```m0V3``` akan dianggap sebagai file yang terdekripsi dan baru akan didekripsi untuk kemudian diproses sesuai dengan kode yang diberikan pada setiap file. Semua proses hingga titik ini merupakan mode default dari program.
 
 mode default (isi direktori library)
+
 ![Screenshot 2024-04-26 171052](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/89290b26-543f-4998-bb94-4d3860500268)
 
 Selain itu, dalam program ini diharuskan memiliki tiga mode. Mode kedua yang dimiliki program ini adalah mode backup yang dapat dijalankan dengan perintah ```./management -m backup```
@@ -365,6 +366,7 @@ if(mode==1){
 ```
 
 mode backup (direktori backup & file dipindahkan)
+
 ![image](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/7d1bf831-2739-4b66-8caf-26b42f30e93a)
 
 kemudian untuk mode restore—untuk mengembalikan file pada direktori backup kepada direktori sebelumnya—dapat digunakan struktur dan fungsi yang sama, tetapi dengan file path yang berbeda
@@ -390,6 +392,7 @@ else if(mode==2){
 ```
 
 mode restore (file backup kembali ke lokasi semula)
+
 ![Screenshot 2024-04-26 215406](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/0b76dab1-7daa-4c4b-9662-118645df905a)
 
 Dalam setiap perintah utama dari program tersebut diikuti dengan fungsi yang berperan untuk mencatat aktifitas yang terjadi pada program yang kemudian akan disimpan pada ```history.log```
@@ -405,6 +408,7 @@ char historyLog(char *nama, char *waktu, char *file, char *kondisi){
 }
 ```
 Berikut merupakan isi dari file ```history.log```
+
 ![Screenshot 2024-04-26 170753](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/37f195e4-5a06-429a-b739-52cb9f9cfe11)
 
 Kendala yang saya alami adalah ketika saya mencoba mengintegrasikan kemampuan untuk mengganti mode ini dengan mengirim sinyal ke daemon, dengan ketentuan yang sudah ditentukan. Program saya tidak berjalan dan juga tidak menggeluarkan output apapun. Di dalam ```debug.log``` yang saya buat. Output error dari program juga tidak menampilkan apapun.
