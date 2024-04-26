@@ -28,7 +28,9 @@ Konfigurasi
 #include <fcntl.h>
 
 #define buffersize 1024
-
+```
+Untuk mengganti teks yang terdapat di dalam text file, seperti saat "m4LwAr3" terdeteksi, akan berubah menjadi "[MALWARE]"
+```c
 void replacestrings(const char *filepath, const char *log_path) {
     const char *suspects[] = {"m4LwAr3", "5pYw4R3", "R4nS0mWaR3"};
     const char *replacements[] = {"[MALWARE]", "[SPYWARE]", "[RANSOMWARE]"};
