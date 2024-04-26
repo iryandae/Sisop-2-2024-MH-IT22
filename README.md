@@ -15,7 +15,7 @@ Membuat/konfigurasi file virus.c
 nano virus.c
 ```
 Konfigurasi
-```shell
+```c
 //belum diganti//
 #include <stdio.h>
 #include <stdlib.h>
@@ -161,3 +161,6 @@ Pd&f8$F5=E?@#[6jd{TJKj][SPYWARE]{KK1?hz384$ge@iba5GAj$gqB41
 
 
 ## Soal 3
+
+
+## Soal 4
