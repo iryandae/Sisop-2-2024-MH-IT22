@@ -164,10 +164,9 @@ Pd&f8$F5=E?@#[6jd{TJKj][SPYWARE]{KK1?hz384$ge@iba5GAj$gqB41
 #C&&a}M9C#f64Eb.?%c)dGbCvJXtU[?SE4h]BY4e1P[RANSOMWARE]{]S/{w?*
 ```
 ### Error
-1. Isi teks pada file sudah berubah, namun pesan yang tercatat pada file virus.log pada folder yang berisi file virus dan virus.c tidak sebagaimana mestinya. Yang muncul malah catatan pada folder lain yang hanay berisi teks yang akan diedit. Dan catatan yang dituliskan adalah semua perubahan, bukan yang telah berubah. ![WhatsApp Image 2024-04-20 at 00 32 25_fa1986b3](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/7fc1487d-bc46-4429-abba-070e9d405c6d)
- ![image](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/ad98cb10-fc37-4938-b1c3-36565f2745c6)
+1. Isi teks pada file sudah berubah, namun pesan yang tercatat pada file virus.log pada folder yang berisi file virus dan virus.c tidak sebagaimana mestinya. Yang muncul malah catatan pada folder lain yang hanay berisi teks yang akan diedit. Dan catatan yang dituliskan adalah semua perubahan, bukan yang telah berubah. ![WhatsApp Image 2024-04-20 at 00 32 25_fa1986b3](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/7fc1487d-bc46-4429-abba-070e9d405c6d) ![WhatsApp Image 2024-04-19 at 23 07 39_d1344ae1](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/ba7de50b-21e1-4319-9d59-ddff0a2ee11c) ![image](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/ad98cb10-fc37-4938-b1c3-36565f2745c6)
 2. File dapat bekerja jika 2 kode digunakan, jadi kode yang awal yang menyiapkan, mengganti isi teks dihapus, lalu diganti dengan kode baru yang bisa menampilkan isi text file dan file log.
-3. Semua sudah bekerja, file yang sebelumnya ditambahkan sudah dihapus dan ditambahkan ulang, ![WhatsApp Image 2024-04-20 at 01 07 22_241472a2](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/ed262f53-31f5-4dac-8180-13909e16e5c2) namun mendadak error.
+3. Semua sudah bekerja, file yang sebelumnya ditambahkan sudah dihapus dan ditambahkan ulang, ![WhatsApp Image 2024-04-20 at 01 07 22_241472a2](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/151121570/ed262f53-31f5-4dac-8180-13909e16e5c2) namun mendadak error, mengeluarkan karakter-karakter invalid.
 
 ## Soal 2
 fungsi untuk mengunduh file dari link yang disediakan
