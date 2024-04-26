@@ -426,6 +426,146 @@ Kendala yang saya alami adalah ketika saya mencoba mengintegrasikan kemampuan un
 
 Berdasarkan masalah ini saya berusaha mencari penyebab masalah dan solusinya hingga saya menemukan kemungkinan bahwa yang menyebabkan error tersebut merupakan kegagalan sistem untuk menerima sinyal yang seharusnya sudah diatur untuk masing-masing modenya. Saya juga sudah mencoba solusi yang diberikan di forum internet, tetapi hal tersebut tidak membuahkan hasil pada kode saya.
 ## Soal 3
+Membuat folder untuk penyimpanan file.
+```shell
+mkdir sisop3 && cd sisop3
+```
+Membuat file `admin.c`.
+```shell
+touch admin.c
+```
+Konfigurasi file admin.c.
+```shell
+nano admin.c
+```
+Impor library yang akan digunakan.
+```shell
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
+#include <string.h>
+```
+Deklarasikan variabel global pid dan log_file.
+```shell
+pid_t pid;
+FILE *log_file;
+```
+Gunakan fungsi write_log untuk menulis log ke file. Fungsi ini menerima pointer ke file, nama proses, status, dan PID untuk log. Fungsi ini mencetak timestamp, PID, nama proses, dan status ke file log.
+```shell
+void write_log(FILE *file, char *process_name, char *status, pid_t pid_to_log) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    if (file != NULL) {
+        fprintf(file, "[%02d:%02d:%04d]-[%02d:%02d:%02d]-%d-%s_%s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, pid_to_log, process_name, status);
+    }
+}
+```
+Fungsi monitor akan membuka file log dengan nama sesuai dengan nama pengguna kemudian membuat proses anak menggunakan fork() lalu proses anak menjalankan perintah shell (ps -u <user> > /dev/null) untuk memeriksa apakah proses pengguna sedang berjalan. Setelah itu,proses induk menunggu proses anak selesai dan mencatat informasi tersebut. Loop berlanjut secara terus-menerus, memeriksa proses pengguna secara berkala menggunakan `while(1)`.
+```shell
+void monitor(char *user) {
+    printf("monitor proses berjalan\n");
+    char filename[50];
+    sprintf(filename, "%s.log", user);
+    log_file = fopen(filename, "a");
+    if (log_file == NULL) {
+        printf("Gagal membuka file log\n");
+        exit(1);
+    }
+    pid = fork();
+    if (pid < 0) {
+        printf("Gagal membuat proses anak\n");
+        exit(1);
+    }
+    if (pid == 0) {
+        setpgid(0, 0);
+        while (1) {
+            pid_t child_pid = fork();
+            if (child_pid == 0) {
+                char *args[] = {"/bin/sh", "-c", NULL, NULL};
+                char command[50];
+                sprintf(command, "ps -u %s > /dev/null", user);
+                args[2] = command;
+                execvp(args[0], args);
+            } else {
+                wait(NULL);
+                write_log(log_file, "monitor proses", "berjalan", child_pid);
+                sleep(1);
+            }
+        }
+    }
+}
+
+```
+Fungsi ini akan menghentikan proses yang berjalan dengan mengirimkan signal `SIGKILL` jika `pid > 0`.
+```shell
+void stop() {
+    printf("proses monitor dihentikan\n");
+    if (pid > 0) {
+        kill(-pid, SIGKILL);
+        write_log(log_file, "monitor proses", "gagal", pid);
+    }
+    if (log_file != NULL) {
+        fclose(log_file);
+    }
+}
+```
+Fungsi ini akan menggagalkan proses yang akan dijalankan dengan mengirimkan signal `SIGSTOP` jika `pid > 0`.
+```shell
+void cancel() {
+    printf("proses digagalkan\n");
+    if (pid > 0) {
+        kill(pid, SIGSTOP);
+        write_log(log_file, "monitor proses", "gagal", pid);
+    }
+}
+```
+Gunakan fungsi resume untuk menjalankan kembali proses yang digagalkan dengan mengirimkan signal `SIGCONT` jika `pid > 0`.
+```shell
+void resume() {
+    printf("proses dijalankan kembali\n");
+    if (pid > 0) {
+        kill(pid, SIGCONT);
+        write_log(log_file, "monitor proses", "dijalankan kembali", pid);
+    }
+}
+```
+Dengan mengambil argumen dari baris command dan memanggil fungsi yang sesuai berdasarkan argumen tersebut. Argumen pertama akan menentukan operasi yang akan dilakukan (-m untuk monitor, -s untuk stop, -c untuk cancel, -a untuk resume), dan argumen kedua adalah nama pengguna yang akan dipantau prosesnya.
+```shell
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        printf("Argumen tidak valid\n");
+        return 1;
+    }
+    char *user = argv[2];
+    if (strcmp(argv[1], "-m") == 0) {
+        monitor(user);
+    } else if (strcmp(argv[1], "-s") == 0) {
+        stop();
+    } else if (strcmp(argv[1], "-c") == 0) {
+        cancel();
+    } else if (strcmp(argv[1], "-a") == 0) {
+        resume();
+    } else {
+        printf("Argumen tidak valid\n");
+    }
+    return 0;
+}
+```
+Kompilasi file `admin.c`.
+```shell
+gcc -o admin admin.c
+```
+<img width="1035" alt="Screenshot 2024-04-27 at 06 31 53" src="https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/150358232/ae45c0e1-0382-45ab-9f6c-3f35dc2e20a9">
+
+<img width="1276" alt="Screenshot 2024-04-27 at 06 25 16" src="https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/150358232/8245e116-654a-4caa-905d-63c68971f7fd">
+Dalam kode ini <user>log berhasil memonitor user,namun kode ini belum berhasil menyelesaikan permasalahan untuk memberhentikan proses monitor, saya sudah mencoba untuk merubah kode dengan merubah logika pencatatan pid, namun saya masih belum bisa menemmukan jalan keluarnya.
+
+
+
 
 
 ## Soal 4
