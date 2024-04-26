@@ -158,8 +158,258 @@ Pd&f8$F5=E?@#[6jd{TJKj][SPYWARE]{KK1?hz384$ge@iba5GAj$gqB41
 #C&&a}M9C#f64Eb.?%c)dGbCvJXtU[?SE4h]BY4e1P[RANSOMWARE]{]S/{w?*
 ```
 ## Soal 2
+fungsi untuk mengunduh file dari link yang disediakan
+```c
+void unduh(){
+	pid_t pid=fork();
+	dump();
+	if(pid==0){
+		char *download[]={"wget","https://drive.google.com/uc?id=1rUIZmp10lXLtCIH3LAZJzRPeRks3Crup&export=download","-O","/home/user/modul_2/soal_2:/library.zip",NULL};
+		execv("/bin/wget",download);
+		exit(EXIT_FAILURE);
+	}
+}
+```
+fungsi untuk unzip file
+```c
+void unzip(){
+	pid_t pid=fork();
+	dump();
+	if(pid==0){
+		char *fileunzip[]={"unzip","/home/user/modul_2/soal_2:/library.zip","-d","/home/user/modul_2/soal_2:/",NULL};
+		execv("/bin/unzip",fileunzip);
+		exit(EXIT_FAILURE);
+	}
+	else if(pid<0){
+		exit(EXIT_FAILURE);
+	}
+}
+```
+kedua fungsi tersebut dijalankan di dalam main dengan wait status untuk memastikan fungsi download sudah selesai sebelum fungsi unzip dijalankan
+```c
+unduh();
+		wait(&status);
+		if(WIFEXITED(status)){
+			unzip();
+		}
+```
+mendekripsi nama file diperlukan rumus dekripsi dengan kunci yang sudah ditentukan (kunci=19), dapat dilakukan dengan rumus
+```c
+char decryptFormula(char ch){
+	int key=19;
+	if(isalpha(ch)){
+		char offset=isupper(ch) ? 'A' : 'a';
+		return ((ch-offset-key+26)%26)+offset;
+	}
+	else{
+		return ch;
+	}
+}
+```
+kemudian rumus dalam fungsi tersebut digunakan dalam fungsi untuk mendekripsi tiap karakter yang ada pada nama file
+```c
+void decryptFilename(char *str){
+	while(*str){
+		*str=decryptFormula(*str);
+		str++;
+	}
+}
+```
+Kemudian, di dalam main digunakan dirent untuk membaca file di dalam direktori
+```c
+DIR *dir=opendir(path);
+		if(dir==NULL) return 0;
+		while((de=readdir(dir))!=NULL){
+			//fungsi dekripsi
+		closedir(dir);
+		}
+```
+Pada program saya, fungsi dekripsi dilakukan setelah file yang tidak terenkripsi sudah diproses berdasarkan kode filenya
+```c
+DIR *dir=opendir(path);
+		if(dir==NULL) return 0;
+		while((de=readdir(dir))!=NULL){
+			
+			char old_name[200];
+			char new_name[200];
+			strcpy(old_name,path);
+			strcat(old_name,de->d_name);
+			
+			if(strstr(de->d_name,"d3Let3")!=NULL){
+				removeFile(de->d_name);
+				historyLog(userName,time_str,de->d_name,"deleted");
+			}
+			else if(strstr(de->d_name,"r3N4mE")!=NULL){
+				renameFile(old_name);
+				historyLog(userName,time_str,de->d_name,"renamed");
+			}
+			else if(strstr(de->d_name,"m0V3")==NULL){
+				strcpy(new_name,path);
+				decryptFilename(de->d_name);        //dekripsi nama file mulai di sini
+				strcat(new_name,de->d_name);
+				rename(old_name,new_name);
+					
+				if(strstr(de->d_name,"d3Let3")!=NULL){
+					removeFile(de->d_name);
+					historyLog(userName,time_str,old_name,"deleted");
+				}
+				else if(strstr(de->d_name,"r3N4mE")!=NULL){
+					renameFile(new_name);
+					historyLog(userName,time_str,old_name,"renamed");
+				}
+			}
+		}
+		closedir(dir);
+		}
+```
+Dalam kumpulan perintah tersebut, untuk setiap file yang memiliki kode ```d3Let3``` akan dihapus dengan fungsi berikut:
+```c
+void removeFile(char *str){
+	char filepath[200];
+	strcpy(filepath,"/home/user/modul_2/soal_2:/library/");
+	strcat(filepath,str);
+	if(remove(filepath)==0) printf("%s deleted\n",str);
+	else perror("Unable to delete file");
+}
+```
+dan untuk setiap file yang memiliki kode ```r3N4mE``` akan direname sesuai dengan ketentuan yang sudah diberikan dengan fungsi berikut:
+```c
+void renameFile(char *str){
+	if(strstr(str,".ts")!=NULL){
+					rename(str,"/home/user/modul_2/soal_2:/library/helper.ts");
+				}
+				else if(strstr(str,".py")!=NULL){
+					rename(str,"/home/user/modul_2/soal_2:/library/calculator.py");
+				}
+				else if(strstr(str,".go")!=NULL){
+					rename(str,"/home/user/modul_2/soal_2:/library/server.go");
+				}
+				else{
+					rename(str,"/home/user/modul_2/soal_2:/library/renamed.file");
+				}
+}
+```
+File yang tidak diproses dan tidak memiliki kode ```m0V3``` akan dianggap sebagai file yang terdekripsi dan baru akan didekripsi untuk kemudian diproses sesuai dengan kode yang diberikan pada setiap file. Semua proses hingga titik ini merupakan mode default dari program.
 
+mode default (isi direktori library)
+![Screenshot 2024-04-26 171052](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/89290b26-543f-4998-bb94-4d3860500268)
 
+Selain itu, dalam program ini diharuskan memiliki tiga mode. Mode kedua yang dimiliki program ini adalah mode backup yang dapat dijalankan dengan perintah ```./management -m backup```
+
+untuk memungkinkan program berjalan berdasarkan perintah yang diinginkan, dapat digunakan perintah berikut:
+```c
+int mode;
+	if(argc>1){
+		if(strcmp(argv[1],"-m")==0){
+			if(strcmp(argv[2],"backup")==0){
+				mode=1;
+			}
+			else if(strcmp(argv[2],"restore")==0){
+				mode=2;
+			}
+		}
+	}
+```
+mode backup digunakan untuk memindahkan file dengan kode ```m0V3``` ke dalam direktori backup. Jika tidak ditemukan direktori yang dibutuhkan, program akan secara otomatis membuat direktori baru sebagai backup
+```c
+void direktoriBackup(){
+	pid_t pid=fork();
+	dump();
+	if(pid==0){
+		char *download[]={"mkdir","/home/user/modul_2/soal_2:/library/backup",NULL};
+		execv("/bin/mkdir",download);
+		exit(EXIT_FAILURE);
+	}
+	else if(pid<0){
+		exit(EXIT_FAILURE);
+	}
+}
+```
+Jika direktori backup sudah ada/sudah dibuat. Program akan langsung memindahkan file ke dalam direktori backup dengan fungsi berikut:
+```c
+void moveFile(char *source, char *destination){
+	pid_t pid=fork();
+	if(pid==0){
+		char *moving[]={"mv",source,destination,NULL};
+		execv("/bin/mv",moving);
+		exit(EXIT_FAILURE);
+	}
+	else if(pid<0){
+		exit(EXIT_FAILURE);
+	}
+	else if(pid>0){
+		wait(NULL);
+	}
+}
+```
+fungsi tersebut dijalankan menggunakan dirent di dalam main
+```c
+if(mode==1){
+		DIR *dir=opendir(path);
+		if(dir==NULL) return 0;
+		direktoriBackup();
+		while((de=readdir(dir))!=NULL){
+			char old_path[200],new_path[200];
+			if(strstr(de->d_name,"m0V3")!=NULL){
+				strcpy(old_path,"/home/user/modul_2/soal_2:/library/");
+				strcat(old_path,de->d_name);
+					
+				strcpy(new_path,"/home/user/modul_2/soal_2:/library/backup/");
+				strcat(new_path,de->d_name);
+				moveFile(old_path,new_path);
+				historyLog(userName,time_str,de->d_name,"moved to backup");
+			}
+		}
+		closedir(dir);
+	}
+```
+
+mode backup (direktori backup & file dipindahkan)
+![image](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/7d1bf831-2739-4b66-8caf-26b42f30e93a)
+
+kemudian untuk mode restore—untuk mengembalikan file pada direktori backup kepada direktori sebelumnya—dapat digunakan struktur dan fungsi yang sama, tetapi dengan file path yang berbeda
+```c
+else if(mode==2){
+		char *new_path="/home/user/modul_2/soal_2:/library/backup/";
+		DIR *dir=opendir(new_path);
+		if(dir==NULL) return 0;
+		while((de=readdir(dir))!=NULL){
+			char old_path[200],new_path[200];
+			if(strstr(de->d_name,"m0V3")!=NULL){
+				strcpy(old_path,"/home/user/modul_2/soal_2:/library/");
+				strcat(old_path,de->d_name);
+					
+				strcpy(new_path,"/home/user/modul_2/soal_2:/library/backup/");
+				strcat(new_path,de->d_name);
+				moveFile(new_path,old_path);
+				historyLog(userName,time_str,de->d_name,"restored from backup");
+			}
+		}
+		closedir(dir);
+	}
+```
+
+mode restore (file backup kembali ke lokasi semula)
+![Screenshot 2024-04-26 215406](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/0b76dab1-7daa-4c4b-9662-118645df905a)
+
+Dalam setiap perintah utama dari program tersebut diikuti dengan fungsi yang berperan untuk mencatat aktifitas yang terjadi pada program yang kemudian akan disimpan pada ```history.log```
+```c
+char historyLog(char *nama, char *waktu, char *file, char *kondisi){
+	FILE *log_file=fopen("/home/user/modul_2/soal_2:/history.log","a");
+	if(log_file==NULL){
+		perror("unable to open");
+		return 1;
+	}
+	fprintf(log_file, "[%s][%s] - %s - Succesfully %s\n", nama, waktu,file,kondisi);
+	fclose(log_file);
+}
+```
+Berikut merupakan isi dari file ```history.log```
+![Screenshot 2024-04-26 170753](https://github.com/iryandae/Sisop-2-2024-MH-IT22/assets/121481079/37f195e4-5a06-429a-b739-52cb9f9cfe11)
+
+Kendala yang saya alami adalah ketika saya mencoba mengintegrasikan kemampuan untuk mengganti mode ini dengan mengirim sinyal ke daemon, dengan ketentuan yang sudah ditentukan. Program saya tidak berjalan dan juga tidak menggeluarkan output apapun. Di dalam ```debug.log``` yang saya buat. Output error dari program juga tidak menampilkan apapun.
+
+Berdasarkan masalah ini saya berusaha mencari penyebab masalah dan solusinya hingga saya menemukan kemungkinan bahwa yang menyebabkan error tersebut merupakan kegagalan sistem untuk menerima sinyal yang seharusnya sudah diatur untuk masing-masing modenya. Saya juga sudah mencoba solusi yang diberikan di forum internet, tetapi hal tersebut tidak membuahkan hasil pada kode saya.
 ## Soal 3
 
 
