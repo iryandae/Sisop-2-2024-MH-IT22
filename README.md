@@ -16,7 +16,6 @@ nano virus.c
 ```
 Konfigurasi, menggunakan buffersize 1000+ agar program dapat berjalan
 ```c
-//belum diganti//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
